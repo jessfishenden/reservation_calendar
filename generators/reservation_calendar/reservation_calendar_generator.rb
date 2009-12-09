@@ -3,12 +3,13 @@ require File.expand_path(File.dirname(__FILE__) + "/lib/insert_routes.rb")
 class ReservationCalendarGenerator < Rails::Generator::Base
   default_options :static_only => false
   
-  attr_reader :class_name, :view_name
+  attr_reader :class_name, :subclass_name, :view_name
   
   def initialize(args, options = {})
     super
-    usage if args.length > 0 and args.length < 2
+    usage if args.length > 0 and args.length < 3
     @class_name = (args.shift || "reservation").underscore
+    @subclass_name = (args.shift || "date").underscore
     @view_name = (args.shift || "calendar").underscore
   end
   
@@ -23,12 +24,15 @@ class ReservationCalendarGenerator < Rails::Generator::Base
       # MVC and other supporting files
       unless options[:static_only]
         m.template "model.rb.erb", File.join("app/models", "#{@class_name}.rb")
+        m.template "subclass_model.rb.erb", File.join("app/models", "#{@subclass_name}.rb")
         m.template "controller.rb.erb", File.join("app/controllers", "#{@view_name}_controller.rb")
         m.directory File.join("app/views", @view_name)
         m.template "view.html.erb", File.join("app/views", @view_name, "index.html.erb")
         m.template "helper.rb.erb", File.join("app/helpers", "#{@view_name}_helper.rb")        
-        m.migration_template "migration.rb.erb", "db/migrate", :migration_file_name => "create_#{@class_name.pluralize}"
-        m.route_name(@view_name, "/#{@view_name}/:year/:month", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
+        m.migration_template "migration.rb.erb", "db/migrate", :migration_file_name => "create_#{@class_name.pluralize}_and_#{@subclass_name.pluralize}"
+        m.route_name(@view_name, "#{@view_name}", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
+        m.route_name("connect", "/#{@view_name}/:year/:month", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
+        
       end
     end
   end

@@ -1,6 +1,6 @@
 Usage:
 
-    script/generate reservation_calendar [EVENT_MODEL VIEW_NAME]
+    script/generate reservation_calendar [RESERVATION_MODEL DATE_MODEL VIEW_NAME] [--use_jquery] [--static_only]
 
   This will create:
       
@@ -11,10 +11,11 @@ Usage:
     # Unless --static-only option is given
     # MVC and supporting files (depending on model and view name)
       app/models/reservation.rb
+      app/models/dates.rb
       app/controllers/calendar_controller.rb
       app/views/calendar
       app/views/calendar/index.html.erb
       app/helpers/calendar_helper.rb
       db/migrate
-      db/migrate/XXXX_create_reservations.rb
+      db/migrate/XXXX_create_reservations_and_dates.rb
       route map.calendar

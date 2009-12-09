@@ -50,43 +50,30 @@ Make sure to include the stylesheet and javascript in your layout/view.
 
 Unless the --static-only option is given, the following will be generated. Names will differ if name arguments were passed to the generator.
 
-====db/migrate/XXXX_create_reservations.rb
+====db/migrate/XXXX_create_reservations_and_dates.rb
 
-  class CreateReservations < ActiveRecord::Migration
-    def self.up
-      create_table :reservations do |t|
-        t.string :name
-        t.timestamps
-      end
+class CreateReservationsAndDates < ActiveRecord::Migration
+  def self.up
+    create_table :reservations do |t|
+      t.string :name
+      t.timestamps
     end
-
-    def self.down
-      drop_table :reservations
+    create_table :dates do |t|
+      t.column :reservation_id, :integer
+      t.column :date, :date
+      t.timestamps
     end
   end
+
+  def self.down
+    drop_table :dates
+    drop_table :reservations
+  end
+end
 
 A reservation can also have a *color* field (hex value stored as a string) which determines the color of the reservation.
 Or simply override the default virtual attribute on the model. For example, if reservations are associated to a calendar model, then the reservations can get their color from the calendar.
 
-
-
-====db/migrate/XXXX_create_dates.rb
-
-  class CreateDates < ActiveRecord::Migration
-    def self.up
-      create_table :dates do |t|
-        t.column :reservation_id, :integer
-        t.column :date, :date
-
-        t.timestamps
-      end
-      add_index :dates, [:reservation_id, :date], :unique => true
-    end
-
-    def self.down
-      drop_table :dates
-    end
-  end
 
 ====app/models/reservation.rb
   

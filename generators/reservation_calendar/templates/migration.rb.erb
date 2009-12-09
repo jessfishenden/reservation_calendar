@@ -1,15 +1,18 @@
-class Create<%= class_name.classify.pluralize %> < ActiveRecord::Migration
+class Create<%= class_name.classify.pluralize %>And<%= subclass_name.classify.pluralize %> < ActiveRecord::Migration
   def self.up
     create_table :<%= class_name.pluralize %> do |t|
       t.string :name
-      t.datetime :start_at
-      t.datetime :end_at
-
+      t.timestamps
+    end
+    create_table :<%= subclass_name.pluralize %> do |t|
+      t.column :reservation_id, :integer
+      t.column :date, :date
       t.timestamps
     end
   end
 
   def self.down
+    drop_table :<%= subclass_name.pluralize %>
     drop_table :<%= class_name.pluralize %>
   end
 end

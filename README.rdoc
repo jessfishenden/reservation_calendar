@@ -72,21 +72,21 @@ Or simply override the default virtual attribute on the model. For example, if r
 
 ====db/migrate/XXXX_create_dates.rb
 
-class CreateDates < ActiveRecord::Migration
-  def self.up
-    create_table :dates do |t|
-      t.column :reservation_id, :integer
-      t.column :date, :date
+  class CreateDates < ActiveRecord::Migration
+    def self.up
+      create_table :dates do |t|
+        t.column :reservation_id, :integer
+        t.column :date, :date
 
-      t.timestamps
+        t.timestamps
+      end
+      add_index :dates, [:reservation_id, :date], :unique => true
     end
-    add_index :dates, [:reservation_id, :date], :unique => true
-  end
 
-  def self.down
-    drop_table :dates
+    def self.down
+      drop_table :dates
+    end
   end
-end
 
 ====app/models/reservation.rb
   

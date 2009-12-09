@@ -1,15 +1,15 @@
-module EventCalendar
+module ReservationCalendar
   
   module PluginMethods
-    def has_event_calendar
-      ClassMethods.setup_event_calendar_on self
+    def has_reservation_calendar
+      ClassMethods.setup_reservation_calendar_on self
     end
   end
   
   # class Methods
   module ClassMethods
     
-    def self.setup_event_calendar_on(recipient)
+    def self.setup_reservation_calendar_on(recipient)
       recipient.extend ClassMethods
       recipient.class_eval do
         include InstanceMethods
@@ -17,12 +17,12 @@ module EventCalendar
     end
     
     # For the given month, find the start and end dates
-    # Find all the events within this range, and create event strips for them
-    def event_strips_for_month(shown_date, first_day_of_week=0)
+    # Find all the reservations within this range, and create reservation strips for them
+    def reservation_strips_for_month(shown_date, first_day_of_week=0)
       strip_start, strip_end = get_start_and_end_dates(shown_date, first_day_of_week)
-      events = events_for_date_range(strip_start, strip_end)
-      event_strips = create_event_strips(strip_start, strip_end, events)
-      event_strips
+      reservations = reservations_for_date_range(strip_start, strip_end)
+      reservation_strips = create_reservation_strips(strip_start, strip_end, reservations)
+      reservation_strips
     end
     
     # Expand start and end dates to show the previous month and next month's days,
@@ -43,8 +43,8 @@ module EventCalendar
       [strip_start, strip_end]
     end
     
-    # Get the events overlapping the given start and end dates
-    def events_for_date_range(start_d, end_d)
+    # Get the reservations overlapping the given start and end dates
+    def reservations_for_date_range(start_d, end_d)
       self.find(
         :all,
         :conditions => [ '(? <= end_at) AND (start_at < ?)', start_d.to_time.utc, end_d.to_time.utc ],
@@ -53,43 +53,43 @@ module EventCalendar
     end
     
     # Create the various strips that show evetns
-    def create_event_strips(strip_start, strip_end, events)
-      # create an inital event strip, with a nil entry for every day of the displayed days
-      event_strips = [[nil] * (strip_end - strip_start + 1)]
+    def create_reservation_strips(strip_start, strip_end, reservations)
+      # create an inital reservation strip, with a nil entry for every day of the displayed days
+      reservation_strips = [[nil] * (strip_end - strip_start + 1)]
     
-      events.each do |event|
-        cur_date = event.start_at.to_date
-        end_date = event.end_at.to_date
-        cur_date, end_date = event.clip_range(strip_start, strip_end)
+      reservations.each do |reservation|
+        cur_date = reservation.start_at.to_date
+        end_date = reservation.end_at.to_date
+        cur_date, end_date = reservation.clip_range(strip_start, strip_end)
         start_range = (cur_date - strip_start).to_i
         end_range = (end_date - strip_start).to_i
       
-        # make sure the event is within our viewing range
+        # make sure the reservation is within our viewing range
         if (start_range <= end_range) and (end_range >= 0) 
           range = start_range..end_range
           
-          open_strip = space_in_current_strips?(event_strips, range)
+          open_strip = space_in_current_strips?(reservation_strips, range)
           
           if open_strip.nil?
             # no strips open, make a new one
             new_strip = [nil] * (strip_end - strip_start + 1)
-            range.each {|r| new_strip[r] = event}
-            event_strips << new_strip
+            range.each {|r| new_strip[r] = reservation}
+            reservation_strips << new_strip
           else
-            # found an open strip, add this event to it
-            range.each {|r| open_strip[r] = event}
+            # found an open strip, add this reservation to it
+            range.each {|r| open_strip[r] = reservation}
           end
         end
       end
-      event_strips
+      reservation_strips
     end
     
-    def space_in_current_strips?(event_strips, range)
+    def space_in_current_strips?(reservation_strips, range)
       open_strip = nil
-      for strip in event_strips
+      for strip in reservation_strips
         strip_is_open = true
         range.each do |r|
-          # overlapping events on this strip
+          # overlapping reservations on this strip
           if !strip[r].nil?
             strip_is_open = false
             break

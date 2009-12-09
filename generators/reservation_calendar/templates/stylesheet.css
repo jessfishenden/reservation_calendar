@@ -1,5 +1,5 @@
 /* 
-  Event Calendar stylesheet
+  Reservation Calendar stylesheet
   
   Colors:
   #d5d5d5 - border (gray)
@@ -139,26 +139,26 @@ a.ec-day-link {
 }
 
 
-/* Event cell and container */
-.ec-event-cell {
+/* Reservation cell and container */
+.ec-reservation-cell {
   cursor: pointer;
   vertical-align: top;
   padding-right: 1px;
   padding-left: 2px;
 }
 
-.ec-event-cell a {
+.ec-reservation-cell a {
   text-decoration: none;
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.ec-no-event-cell {
+.ec-no-reservation-cell {
   cursor: default;
 }
 
-.ec-event {
+.ec-reservation {
   color: white;
   padding-right: 1px;
   padding-left: 11px;
@@ -169,7 +169,7 @@ a.ec-day-link {
   white-space: nowrap;
 }
 
-.ec-event :hover {
+.ec-reservation :hover {
   background-color: #2eac6a;
 }
 

@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + "/lib/insert_routes.rb")
 
-class EventCalendarGenerator < Rails::Generator::Base
+class ReservationCalendarGenerator < Rails::Generator::Base
   default_options :static_only => false
   
   attr_reader :class_name, :view_name
@@ -8,17 +8,17 @@ class EventCalendarGenerator < Rails::Generator::Base
   def initialize(args, options = {})
     super
     usage if args.length > 0 and args.length < 2
-    @class_name = (args.shift || "event").underscore
+    @class_name = (args.shift || "reservation").underscore
     @view_name = (args.shift || "calendar").underscore
   end
   
   def manifest
     record do |m|
       # static files
-      m.file "stylesheet.css", "public/stylesheets/event_calendar.css"
+      m.file "stylesheet.css", "public/stylesheets/reservation_calendar.css"
       
 			script = options[:use_jquery] ? 'jq_javascript.js' : 'javascript.js'
-		  m.file script, "public/javascripts/event_calendar.js"
+		  m.file script, "public/javascripts/reservation_calendar.js"
       
       # MVC and other supporting files
       unless options[:static_only]

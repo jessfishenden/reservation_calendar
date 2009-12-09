@@ -4,20 +4,20 @@ module <%= view_name.classify %>Helper
   end
   
   # custom options for this calendar
-  def event_calendar_opts
+  def reservation_calendar_opts
     { 
       :year => @year,
       :month => @month,
-      :event_strips => @event_strips,
+      :reservation_strips => @reservation_strips,
       :month_name_text => @shown_month.strftime("%B %Y"),
       :previous_month_text => "<< " + month_link(@shown_month.last_month),
       :next_month_text => month_link(@shown_month.next_month) + " >>"
     }
   end
 
-  def event_calendar
-    calendar event_calendar_opts do |event|
-      %(<a href="/events/#{event.id}" title="#{h(event.name)}">#{h(event.name)}</a>)
+  def reservation_calendar
+    calendar reservation_calendar_opts do |reservation|
+      %(<a href="/reservations/#{reservation.id}" title="#{h(reservation.name)}">#{h(reservation.name)}</a>)
     end
   end
 end

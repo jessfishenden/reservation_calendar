@@ -1,4 +1,4 @@
 # desc "Explaining what the task does"
-# task :event_calendar do
+# task :reservation_calendar do
 #   # Task goes here
 # end

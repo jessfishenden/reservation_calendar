@@ -1,8 +1,20 @@
-==EventCalendar
+==ReservationCalendar
 
-Easily show multiple, overlapping events across calendar days and rows.
+Easily show multiple, overlapping reservations across calendar days and rows.
 
-See http://dev.elevationblog.com/2009/7/23/event-calendar-rails-plugin for a screenshot.
+Based on Jeff Schuil's Event Calendar: http://github.com/elevation/event_calendar
+The difference between this and his is in the underlying model that this one supports.
+
+Jeff's Event Calendar calls for an underlying model class in which each instance
+has a start date and an end date.
+
+This calendar works from an underlying model class in which each instance that
+contains any number and assortment of child individual date objects. It also
+creates a model with a foreign key out to some object of your choice that must
+implement the :display_name method.  The idea is that since this is a resevation
+calendar, each reservation is a reservation of some actual thing, and that
+thing's name should be displayed in the calendar.
+
 
 After install, the "calendar" method will be available within your views.
 
@@ -11,20 +23,20 @@ To customize the look, modify the included stylesheet and/or change the default 
 
 ==Install
 
-  script/plugin install git://github.com/elevation/event_calendar.git
+  script/plugin install git://github.com/broughten/reservation_calendar.git
 
 To generate the necessary static files AND the example below:
 
-  script/generate event_calendar
+  script/generate reservation_calendar
 
 Options:
 
 * --static-only: Only generate the stylesheet and javascript
 * --use-jquery: Generate jquery javascript
 
-You can change the default event model name (Event) and view name (Calendar) by passing in two name arguments:
+You can change the default reservation model name (Reservation) and view name (Calendar) by passing in two name arguments:
 
-  script/generate event_calendar EventModel ViewName
+  script/generate reservation_calendar ReservationModel ViewName
   
 
 ==Generated Files
@@ -33,44 +45,60 @@ Make sure to include the stylesheet and javascript in your layout/view.
 
 ====Static files
 
-  public/stylesheets/event_calendar.css
-  public/javascripts/event_calendar.js
+  public/stylesheets/reservation_calendar.css
+  public/javascripts/reservation_calendar.js
 
 Unless the --static-only option is given, the following will be generated. Names will differ if name arguments were passed to the generator.
 
-====db/migrate/XXXX_create_events.rb
+====db/migrate/XXXX_create_reservations.rb
 
-  class CreateEvents < ActiveRecord::Migration
+  class CreateReservations < ActiveRecord::Migration
     def self.up
-      create_table :events do |t|
+      create_table :reservations do |t|
         t.string :name
-        t.datetime :start_at
-        t.datetime :end_at
-
         t.timestamps
       end
     end
 
     def self.down
-      drop_table :events
+      drop_table :reservations
     end
   end
-  
-At minimum we need to have start_at and end_at fields.
 
-An event can also have a *color* field (hex value stored as a string) which determines the color of the event.
-Or simply override the default virtual attribute on the model. For example, if events are associated to a calendar model, then the events can get their color from the calendar.
+A reservation can also have a *color* field (hex value stored as a string) which determines the color of the reservation.
+Or simply override the default virtual attribute on the model. For example, if reservations are associated to a calendar model, then the reservations can get their color from the calendar.
 
-====app/models/event.rb
+
+
+====db/migrate/XXXX_create_dates.rb
+
+class CreateDates < ActiveRecord::Migration
+  def self.up
+    create_table :dates do |t|
+      t.column :reservation_id, :integer
+      t.column :date, :date
+
+      t.timestamps
+    end
+    add_index :dates, [:reservation_id, :date], :unique => true
+  end
+
+  def self.down
+    drop_table :dates
+  end
+end
+
+====app/models/reservation.rb
   
-  class Event < ActiveRecord::Base
-    has_event_calendar
+  class Reservation < ActiveRecord::Base
+    has_reservation_calendar
   end
 
 ====config/routes.rb
 
-  map.calendar "/calendar/:year/:month", :controller => "calendar", :action => "index", :year => Time.now.year, :month => Time.now.month
-
+  map.calendar 'calendar', :controller => 'calendar', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month
+  map.connect '/calendar/:year/:month', :controller => 'calendar', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month
+ 
 ====app/controllers/calendar_controller.rb
   
   class CalendarController < ApplicationController
@@ -81,7 +109,7 @@ Or simply override the default virtual attribute on the model. For example, if e
 
       @shown_month = Date.civil(@year, @month)
 
-      @event_strips = Event.event_strips_for_month(@shown_month)
+      @reservation_strips = Reservation.reservation_strips_for_month(@shown_month)
     end
 
   end
@@ -96,31 +124,31 @@ Some helper methods are created, but you could put this in the view. The key is 
     end
   
     # custom options for this calendar
-    def event_calendar_options
+    def reservation_calendar_options
       { 
         :year => @year,
         :month => @month,
-        :event_strips => @event_strips,
+        :reservation_strips => @reservation_strips,
         :month_name_text => @shown_month.strftime("%B %Y"),
         :previous_month_text => "<< " + month_link(@shown_month.last_month),
         :next_month_text => month_link(@shown_month.next_month) + " >>"
       }
     end
 
-    def event_calendar
-      calendar event_calendar_options do |event|
-        %(<a href="/events/#{event.id}" title="#{h(event.name)}">#{h(event.name)}</a>)
+    def reservation_calendar
+      calendar reservation_calendar_options do |reservation|
+        %(<a href="/reservations/#{reservation.id}" title="#{h(reservation.name)}">#{h(reservation.name)}</a>)
       end
     end
   end
   
-Notice you can pass in a block to the calendar method. In this example I'm passing a link to the event details, and displaying the event's name.
+Notice you can pass in a block to the calendar method. In this example I'm passing a link to the reservation details, and displaying the reservation's name.
 
 ====app/views/calendar/index.html.erb
 
 Then in calendar view, simply:
 
-  <%= event_calendar %>
+  <%= reservation_calendar %>
 
 
 ==Default Options
@@ -136,7 +164,7 @@ The default options for the calendar are:
     :month_name_text => Time.zone.now.strftime("%B %Y"),
     :previous_month_text => nil,
     :next_month_text => nil,
-    :event_strips => [],
+    :reservation_strips => [],
     
     # it would be nice to have these in the CSS file
     # but they are needed to perform height calculations
@@ -144,15 +172,15 @@ The default options for the calendar are:
     :height => 500, 
     :day_names_height => 18,
     :day_nums_height => 18,
-    :event_height => 18,
-    :event_margin => 1,
-    :event_padding_top => 1,
+    :reservation_height => 18,
+    :reservation_margin => 1,
+    :reservation_padding_top => 1,
     
     :use_javascript => true,
     :link_to_day_action => false
   }
   
-You can override any of these by passing your options to the calendar method. In the above example, update the event_calendar_options helper method.
+You can override any of these by passing your options to the calendar method. In the above example, update the reservation_calendar_options helper method.
 
 ====Details
 
@@ -160,9 +188,9 @@ You can override any of these by passing your options to the calendar method. In
 
 * *width*: Optional, if none is given it will stretch to the containing element.
 
-* *height*: Defaults to 500px. This is the approx minimum total height of the calendar. It could be greater if a calendar row(s) need to stretch to fit additional events.
+* *height*: Defaults to 500px. This is the approx minimum total height of the calendar. It could be greater if a calendar row(s) need to stretch to fit additional reservations.
 
-* *use_javascript*: If you set it to false, cleaner HTML will be output, without inline Javascript, but events spanning multiple days will not be displayed correctly. This option should therefore only be used if your calendar uses only single-day events.
+* *use_javascript*: If you set it to false, cleaner HTML will be output, without inline Javascript, but reservations spanning multiple days will not be displayed correctly. This option should therefore only be used if your calendar uses only single-day reservations.
 
 * *link_to_day_action*: Will make the calendar's day numbers links to the given Rails action. Note, you'll probably want a corresponding route, controller action, and view to go with this action. Example:
   
@@ -175,34 +203,35 @@ You can override any of these by passing your options to the calendar method. In
 
 ==Notes
 
-* If you want to change the <b>first day of the week</b> from the default of Sunday (0), then set the new value in an instance variable and pass it to event_strips_for_month (in the controller), and to the event calendar options (in the helper/view).
+* If you want to change the <b>first day of the week</b> from the default of Sunday (0), then set the new value in an instance variable and pass it to reservation_strips_for_month (in the controller), and to the reservation calendar options (in the helper/view).
 
   Controller:
     @first_day_of_week = 1
-    @event_strips = Event.event_strips_for_month(@shown_month, @first_day_of_week)
+    @reservation_strips = Reservation.reservation_strips_for_month(@shown_month, @first_day_of_week)
   
   Helper/View calendar options:
     :first_day_of_week => @first_day_of_week
     
-* If you need access to the events, not just the event strips, then instead of calling event_strips_for_month call these 3 methods:
+* If you need access to the reservations, not just the reservation strips, then instead of calling reservation_strips_for_month call these 3 methods:
 
-    start_d, end_d = Event.get_start_and_end_dates(@shown_month) # optionally pass in @first_day_of_week
-    @events = Event.events_for_date_range(start_d, end_d)
-    @event_strips = Event.create_event_strips(start_d, end_d, @events)
+    start_d, end_d = Reservation.get_start_and_end_dates(@shown_month) # optionally pass in @first_day_of_week
+    @reservations = Reservation.reservations_for_date_range(start_d, end_d)
+    @reservation_strips = Reservation.create_reservation_strips(start_d, end_d, @reservations)
 
-* The event <b>select color</b> is set in the event_calendar.js file.
+* The reservation <b>select color</b> is set in the reservation_calendar.js file.
   
 
 ==Contributors
 
-* Jeff Schuil
+* Jeff Schuil (original author)
+* Jon Christensen (modified to reservation from events)
 * See commit history for list of additional contributors.
 * Thanks to those who have added features, fixed bugs, and/or reported issues.
 
 == History
 
-* Though EventCalendar has diverged greatly, it was...
+* Though ReservationCalendar has diverged greatly, it was...
 * Originally based off of James Urquhart's http://www.cuppadev.co.uk/webdev/making-a-real-calendar-in-rails/
 * This in turn started as Geoffrey Grosenbach's CalendarHelper.
 
-Copyright (c) 2009 Elevation, released under the MIT license
+Copyright (c) 2009 Kelsus Inc, released under the MIT license

@@ -1,7 +1,7 @@
-module EventCalendar
+module ReservationCalendar
   module CalendarHelper
  
-    # Returns an HTML calendar which can show multiple, overlapping events across calendar days and rows.
+    # Returns an HTML calendar which can show multiple, overlapping reservations across calendar days and rows.
     # Customize using CSS, the below options, and by passing in a code block.
     #
     # The following are optional, available for customizing the default behaviour:
@@ -16,19 +16,19 @@ module EventCalendar
     #     Defaults to current month name from Date::MONTHNAMES hash.
     # :previous_month_text => nil # Displayed left of the month name if set
     # :next_month_text => nil # Displayed right of the month name if set
-    # :event_strips => [] # An array of arrays, encapsulating the event rows on the calendar
+    # :reservation_strips => [] # An array of arrays, encapsulating the reservation rows on the calendar
     # :width => nil # Width of the calendar, if none is set then it will stretch the container's width
     # :height => 500 # Approx minimum total height of the calendar (excluding the header).
-    #     Height could get added if a day has too many event's to fit.
+    #     Height could get added if a day has too many reservation's to fit.
     # :day_names_height => 18 # Height of the day names table (included in the above 'height' option)
     # :day_nums_height => 18 # Height of the day numbers tables (included in the 'height' option)
-    # :event_height => 18 # Height of an individual event row
-    # :event_margin => 1 # Spacing of the event rows
-    # :event_padding_top => 1 # Padding on the top of the event rows (increase to move text down)
-    # :use_javascript => true # Outputs HTML with inline javascript so events spanning multiple days will be highlighted.
-    #     If this option is false, cleaner HTML will be output, but events spanning multiple days will 
+    # :reservation_height => 18 # Height of an individual reservation row
+    # :reservation_margin => 1 # Spacing of the reservation rows
+    # :reservation_padding_top => 1 # Padding on the top of the reservation rows (increase to move text down)
+    # :use_javascript => true # Outputs HTML with inline javascript so reservations spanning multiple days will be highlighted.
+    #     If this option is false, cleaner HTML will be output, but reservations spanning multiple days will 
     #     not be highlighted correctly on hover, so it is only really useful if you know your calendar
-    #     will only have single-day events. Defaults to true.
+    #     will only have single-day reservations. Defaults to true.
     # :link_to_day_action => false # If controller action is passed,
     #     the day number will be a link. Override the day_link method for greater customization.
     #
@@ -48,7 +48,7 @@ module EventCalendar
         :month_name_text => Time.zone.now.strftime("%B %Y"),
         :previous_month_text => nil,
         :next_month_text => nil,
-        :event_strips => [],
+        :reservation_strips => [],
         
         # it would be nice to have these in the CSS file
         # but they are needed to perform height calculations
@@ -56,9 +56,9 @@ module EventCalendar
         :height => 500, 
         :day_names_height => 18,
         :day_nums_height => 18,
-        :event_height => 18,
-        :event_margin => 1,
-        :event_padding_top => 1,
+        :reservation_height => 18,
+        :reservation_margin => 1,
+        :reservation_padding_top => 1,
         
         :use_javascript => true,
         :link_to_day_action => false
@@ -69,7 +69,7 @@ module EventCalendar
       options[:month_name_text] ||= Date::MONTHNAMES[options[:month]]
       
       # make the height calculations
-      # tricky since multiple events in a day could force an increase in the set height
+      # tricky since multiple reservations in a day could force an increase in the set height
       height = options[:day_names_height]
       row_heights = cal_row_heights(options)
       row_heights.each do |row_height|
@@ -166,55 +166,55 @@ module EventCalendar
         end
         cal << %(</tr>)
         
-        # event rows for this day
-        # for each event strip, create a new table row
-        options[:event_strips].each do |strip|
+        # reservation rows for this day
+        # for each reservation strip, create a new table row
+        options[:reservation_strips].each do |strip|
           cal << %(<tr>)
           # go through through the strip, for the entries that correspond to the days of this week
-          strip[row_num*7, 7].each_with_index do |event, index|
+          strip[row_num*7, 7].each_with_index do |reservation, index|
             day = first_day_of_week + index
             
-            if event
-              # get the dates of this event that fit into this week
-              dates = event.clip_range(first_day_of_week, last_day_of_week)
-              # if the event (after it has been clipped) starts on this date,
+            if reservation
+              # get the dates of this reservation that fit into this week
+              dates = reservation.clip_range(first_day_of_week, last_day_of_week)
+              # if the reservation (after it has been clipped) starts on this date,
               # then create a new cell that spans the number of days
               if dates[0] == day.to_date
                 
-                cal << %(<td class="ec-event-cell" colspan="#{(dates[1]-dates[0]).to_i + 1}" )
-                cal << %(style="padding-top: #{options[:event_margin]}px;">)
-                cal << %(<div class="ec-event event_#{event.id}" )
-                cal << %(style="background-color: #{event.color}; )
-                cal << %(padding-top: #{options[:event_padding_top]}px; )
-                cal << %(height: #{options[:event_height] - options[:event_padding_top]}px;" )
+                cal << %(<td class="ec-reservation-cell" colspan="#{(dates[1]-dates[0]).to_i + 1}" )
+                cal << %(style="padding-top: #{options[:reservation_margin]}px;">)
+                cal << %(<div class="ec-reservation reservation_#{reservation.id}" )
+                cal << %(style="background-color: #{reservation.color}; )
+                cal << %(padding-top: #{options[:reservation_padding_top]}px; )
+                cal << %(height: #{options[:reservation_height] - options[:reservation_padding_top]}px;" )
                 if options[:use_javascript]
-                  cal << %(event_id="#{event.id}" color="#{event.color}" )
-                  cal << %(onmouseover="select_event(this, true);" onmouseout="select_event(this, false);" )
+                  cal << %(reservation_id="#{reservation.id}" color="#{reservation.color}" )
+                  cal << %(onmouseover="select_reservation(this, true);" onmouseout="select_reservation(this, false);" )
                 end
                 cal << %(>)
                 
-                # add a left arrow if event is clipped at the beginning
-                if event.start_at.to_date < dates[0]
+                # add a left arrow if reservation is clipped at the beginning
+                if reservation.start_at.to_date < dates[0]
                   cal << %(<div class="ec-left-arrow"></div>)
                 end
-                # add a right arrow if event is clipped at the end
-                if event.end_at.to_date > dates[1]
+                # add a right arrow if reservation is clipped at the end
+                if reservation.end_at.to_date > dates[1]
                   cal << %(<div class="ec-right-arrow"></div>)
                 end
                 
                 # add the additional html that was passed as a block to this helper
-                cal << block.call(event)
+                cal << block.call(reservation)
                 
                 cal << %(</div></td>)
               end
               
             else
-              # there wasn't an event, so create an empty cell and container
-              cal << %(<td class="ec-event-cell ec-no-event-cell" )
-              cal << %(style="padding-top: #{options[:event_margin]}px;">)
-              cal << %(<div class="ec-event" )
-              cal << %(style="padding-top: #{options[:event_padding_top]}px; )
-              cal << %(height: #{options[:event_height] - options[:event_padding_top]}px;" )
+              # there wasn't a reservation, so create an empty cell and container
+              cal << %(<td class="ec-reservation-cell ec-no-reservation-cell" )
+              cal << %(style="padding-top: #{options[:reservation_margin]}px;">)
+              cal << %(<div class="ec-reservation" )
+              cal << %(style="padding-top: #{options[:reservation_padding_top]}px; )
+              cal << %(height: #{options[:reservation_height] - options[:reservation_padding_top]}px;" )
               cal << %(>)
               cal << %(&nbsp;</div></td>)
             end
@@ -246,31 +246,31 @@ module EventCalendar
     # calculate the height of each row
     # by default, it will be the height option minus the day names height,
     # divided by the total number of calendar rows
-    # this gets tricky, however, if there are too many event rows to fit into the row's height
+    # this gets tricky, however, if there are too many reservation rows to fit into the row's height
     # then we need to add additional height
     def cal_row_heights(options)
-      # number of rows is the number of days in the event strips divided by 7
-      num_cal_rows = options[:event_strips].first.size / 7
+      # number of rows is the number of days in the reservation strips divided by 7
+      num_cal_rows = options[:reservation_strips].first.size / 7
       # the row will be at least this big
       min_height = (options[:height] - options[:day_names_height]) / num_cal_rows
       row_heights = []
-      num_event_rows = 0
-      # for every day in the event strip...
-      1.upto(options[:event_strips].first.size+1) do |index|
-        num_events = 0
-        # get the largest event strip that has an event on this day
-        options[:event_strips].each_with_index do |strip, strip_num|
-          num_events = strip_num + 1 unless strip[index-1].blank?
+      num_reservation_rows = 0
+      # for every day in the reservation strip...
+      1.upto(options[:reservation_strips].first.size+1) do |index|
+        num_reservations = 0
+        # get the largest reservation strip that has a reservation on this day
+        options[:reservation_strips].each_with_index do |strip, strip_num|
+          num_reservations = strip_num + 1 unless strip[index-1].blank?
         end
-        # get the most event rows for this week
-        num_event_rows = [num_event_rows, num_events].max
+        # get the most reservation rows for this week
+        num_reservation_rows = [num_reservation_rows, num_reservations].max
         # if we reached the end of the week, calculate this row's height
         if index % 7 == 0
-          total_event_height = options[:event_height] + options[:event_margin]
-          calc_row_height = (num_event_rows * total_event_height) + options[:day_nums_height] + options[:event_margin]
+          total_reservation_height = options[:reservation_height] + options[:reservation_margin]
+          calc_row_height = (num_reservation_rows * total_reservation_height) + options[:day_nums_height] + options[:reservation_margin]
           row_height = [min_height, calc_row_height].max
           row_heights << row_height
-          num_event_rows = 0
+          num_reservation_rows = 0
         end
       end
       row_heights

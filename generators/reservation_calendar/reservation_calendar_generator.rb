@@ -28,7 +28,8 @@ class ReservationCalendarGenerator < Rails::Generator::Base
         m.template "controller.rb.erb", File.join("app/controllers", "#{@view_name}_controller.rb")
         m.directory File.join("app/views", @view_name)
         m.template "view.html.erb", File.join("app/views", @view_name, "index.html.erb")
-        m.template "helper.rb.erb", File.join("app/helpers", "#{@view_name}_helper.rb")        
+        m.template "helper.rb.erb", File.join("app/helpers", "#{@view_name}_helper.rb")
+        m.template "reservation_calendar.rb", File.join("vendor/plugins/reservation_calendar/", @subclass_name, "reservation_calendar.rb")
         m.migration_template "migration.rb.erb", "db/migrate", :migration_file_name => "create_#{@class_name.pluralize}_and_#{@subclass_name.pluralize}"
         m.route_name(@view_name, "#{@view_name}", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
         m.route_name("connect", "/#{@view_name}/:year/:month", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")

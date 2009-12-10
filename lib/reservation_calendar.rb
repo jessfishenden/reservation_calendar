@@ -47,9 +47,9 @@ module ReservationCalendar
     def reservations_for_date_range(start_d, end_d)
       self.find(
         :all,
-        :joins => :<%= subclass_name.pluralize %>,
-        :conditions => [ '(? <= end_at) AND (start_at < ?)', start_d.to_time.utc, end_d.to_time.utc ],
-        :order => 'start_at ASC'
+        :joins => subclass_name.pluralize,
+        :conditions => [ '#{subclass_name.pluralize}.date >= ?  and #{subclass_name.pluralize}.date <= ?', start_d.to_time.utc, end_d.to_time.utc ],
+        :order => '#{subclass_name.pluralize.date} ASC'
       )
     end
     

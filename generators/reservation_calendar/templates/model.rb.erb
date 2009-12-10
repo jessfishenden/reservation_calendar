@@ -1,6 +1,6 @@
 class <%= class_name.classify %> < ActiveRecord::Base
   has_reservation_calendar
 
-  has_many :<%= subclass_name.classify.pluralize %>
+  has_many :<%= subclass_name.pluralize %>
   
 end

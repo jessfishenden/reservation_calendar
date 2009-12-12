@@ -1,3 +1,6 @@
 class <%= subclass_name.classify %> < ActiveRecord::Base
-  
+  belongs_to :<%= class_name %>
+
+  named_scope :clip, lambda { |start_date, end_date| {:conditions => ['date >= ? AND date <= ?', start_date, end_date] } }
+
 end

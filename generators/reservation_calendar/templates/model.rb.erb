@@ -1,10 +1,11 @@
 class <%= class_name.classify %> < ActiveRecord::Base
   has_reservation_calendar
 
-  has_many :<%= subclass_name.pluralize %>
+  has_many :<%= subclass_name.pluralize %>, :order => :date
+  validates_length_of :<%= subclass_name.pluralize %>, :minimum => 1, :message => 'must contain at least %d <%= subclass_name %>'
 
   def subclass_name
-    <%= subclass_name %>
+    return "<%= subclass_name %>"
   end
 
 end

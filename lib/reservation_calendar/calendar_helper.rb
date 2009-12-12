@@ -176,12 +176,12 @@ module ReservationCalendar
             
             if reservation
               # get the dates of this reservation that fit into this week
-              dates = reservation.clip_range(first_day_of_week, last_day_of_week)
+              dates = reservation.reserved_dates.clip(first_day_of_week, last_day_of_week)
               # if the reservation (after it has been clipped) starts on this date,
               # then create a new cell that spans the number of days
-              if dates[0] == day.to_date
+              if dates[0].date == day.to_date
                 
-                cal << %(<td class="ec-reservation-cell" colspan="#{(dates[1]-dates[0]).to_i + 1}" )
+                cal << %(<td class="ec-reservation-cell" colspan="#{(dates[1].date-dates[0].date).to_i + 1}" )
                 cal << %(style="padding-top: #{options[:reservation_margin]}px;">)
                 cal << %(<div class="ec-reservation reservation_#{reservation.id}" )
                 cal << %(style="background-color: #{reservation.color}; )
@@ -194,11 +194,11 @@ module ReservationCalendar
                 cal << %(>)
                 
                 # add a left arrow if reservation is clipped at the beginning
-                if reservation.start_at.to_date < dates[0]
+                if reservation.reserved_dates.first.date < dates[0].date
                   cal << %(<div class="ec-left-arrow"></div>)
                 end
                 # add a right arrow if reservation is clipped at the end
-                if reservation.end_at.to_date > dates[1]
+                if reservation.reserved_dates.last.date > dates[1].date
                   cal << %(<div class="ec-right-arrow"></div>)
                 end
                 

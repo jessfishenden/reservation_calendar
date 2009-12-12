@@ -47,9 +47,9 @@ module ReservationCalendar
     def reservations_for_date_range(start_d, end_d)
       self.find(
         :all,
-        :joins => subclass_name.pluralize,
-        :conditions => [ '#{subclass_name.pluralize}.date >= ?  and #{subclass_name.pluralize}.date <= ?', start_d.to_time.utc, end_d.to_time.utc ],
-        :order => '#{subclass_name.pluralize.date} ASC'
+        :select => 'DISTINCT reservations.*',
+        :joins => subclass_name.pluralize.to_sym,
+        :conditions => [ "#{subclass_name.pluralize}.date >= ?  and #{subclass_name.pluralize}.date <= ?", start_d.to_time.utc, end_d.to_time.utc ]
       )
     end
     
@@ -57,29 +57,27 @@ module ReservationCalendar
     def create_reservation_strips(strip_start, strip_end, reservations)
       # create an inital reservation strip, with a nil entry for every day of the displayed days
       reservation_strips = [[nil] * (strip_end - strip_start + 1)]
-    
+
+      #First I need to get rid of the dates that are outside my view.
+
+      #Then I need to map each date to it's number on the array.
+
       reservations.each do |reservation|
-        cur_date = reservation.start_at.to_date
-        end_date = reservation.end_at.to_date
-        cur_date, end_date = reservation.clip_range(strip_start, strip_end)
-        start_range = (cur_date - strip_start).to_i
-        end_range = (end_date - strip_start).to_i
-      
-        # make sure the reservation is within our viewing range
-        if (start_range <= end_range) and (end_range >= 0) 
-          range = start_range..end_range
+        in_range_dates = reservation.reserved_dates.clip(strip_start, strip_end)
+
+        range = []
+        in_range_dates.each { |date_obj| range << (date_obj.date - strip_start).to_i }
+
+        open_strip = space_in_current_strips?(reservation_strips, range)
           
-          open_strip = space_in_current_strips?(reservation_strips, range)
-          
-          if open_strip.nil?
-            # no strips open, make a new one
-            new_strip = [nil] * (strip_end - strip_start + 1)
-            range.each {|r| new_strip[r] = reservation}
-            reservation_strips << new_strip
-          else
-            # found an open strip, add this reservation to it
-            range.each {|r| open_strip[r] = reservation}
-          end
+        if open_strip.nil?
+          # no strips open, make a new one
+          new_strip = [nil] * (strip_end - strip_start + 1)
+          range.each {|r| new_strip[r] = reservation}
+          reservation_strips << new_strip
+        else
+          # found an open strip, add this reservation to it
+          range.each {|r| open_strip[r] = reservation}
         end
       end
       reservation_strips
@@ -122,47 +120,18 @@ module ReservationCalendar
   
   # Instance Methods
   module InstanceMethods
-    def year
-      date.year
-    end
-  
-    def month
-      date.month
-    end
- 
-    def day
-      date.day
-    end
   
     def color
       self[:color] || '#9aa4ad'
     end
+
+    def color=(color)
+      self[:color] = color
+    end
   
     def days
-      end_at.to_date - start_at.to_date
+      reserved_dates.size
     end
   
-    # start_d - start of the month, or start of the week
-    # end_d - end of the month, or end of the week
-    def clip_range(start_d, end_d)
-      # make sure we are comparing date objects to date objects,
-      # otherwise timezones can cause problems
-      start_at_d = start_at.to_date
-      end_at_d = end_at.to_date
-      # Clip start date, make sure it also ends on or after the start range
-      if (start_at_d < start_d and end_at_d >= start_d)
-        clipped_start = start_d
-      else
-        clipped_start = start_at_d
-      end
-    
-      # Clip end date
-      if (end_at_d > end_d)
-        clipped_end = end_d
-      else
-        clipped_end = end_at_d
-      end
-      [clipped_start, clipped_end]
-    end
   end
 end

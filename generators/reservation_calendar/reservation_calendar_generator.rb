@@ -9,7 +9,7 @@ class ReservationCalendarGenerator < Rails::Generator::Base
     super
     usage if args.length > 0 and args.length < 3
     @class_name = (args.shift || "reservation").underscore
-    @subclass_name = (args.shift || "date").underscore
+    @subclass_name = (args.shift || "reserved_date").underscore
     @view_name = (args.shift || "calendar").underscore
   end
   

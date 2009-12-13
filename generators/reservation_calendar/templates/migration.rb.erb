@@ -5,7 +5,7 @@ class Create<%= class_name.classify.pluralize %>And<%= subclass_name.classify.pl
       t.timestamps
     end
     create_table :<%= subclass_name.pluralize %> do |t|
-      t.column :<%= class_name.pluralize %>_id, :integer
+      t.column :<%= class_name %>_id, :integer
       t.column :date, :date
       t.timestamps
     end

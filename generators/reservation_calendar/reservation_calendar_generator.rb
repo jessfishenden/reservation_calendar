@@ -16,6 +16,7 @@ class ReservationCalendarGenerator < Rails::Generator::Base
   def manifest
     record do |m|
       # static files
+      m.directory File.join("public/stylesheets")
       m.file "stylesheet.css", "public/stylesheets/reservation_calendar.css"
       
 			script = options[:use_jquery] ? 'jq_javascript.js' : 'javascript.js'

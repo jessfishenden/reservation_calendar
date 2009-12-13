@@ -24,9 +24,11 @@ class ReservationCalendarGenerator < Rails::Generator::Base
       
       # MVC and other supporting files
       unless options[:static_only]
+        m.directory File.join("app/models")
         m.template "model.rb.erb", File.join("app/models", "#{@class_name}.rb")
         m.template "subclass_model.rb.erb", File.join("app/models", "#{@subclass_name}.rb")
         m.template "controller.rb.erb", File.join("app/controllers", "#{@view_name}_controller.rb")
+        m.directory File.join("app/views")
         m.directory File.join("app/views", @view_name)
         m.template "view.html.erb", File.join("app/views", @view_name, "index.html.erb")
         m.template "helper.rb.erb", File.join("app/helpers", "#{@view_name}_helper.rb")

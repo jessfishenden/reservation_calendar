@@ -2,20 +2,17 @@ module ReservationCalendar
   
   module PluginMethods
     def has_reservation_calendar
-      ClassMethods.setup_reservation_calendar_on self
-    end
-  end
-  
-  # class Methods
-  module ClassMethods
-    
-    def self.setup_reservation_calendar_on(recipient)
-      recipient.extend ClassMethods
-      recipient.class_eval do
+      # only include the methods once if has_reservation_calendar
+      # is called more that once
+      unless included_modules.include? InstanceMethods 
+        extend ClassMethods 
         include InstanceMethods
       end
     end
-    
+  end
+
+  # class Methods
+  module ClassMethods
     # For the given month, find the start and end dates
     # Find all the reservations within this range, and create reservation strips for them
     def reservation_strips_for_month(shown_date, first_day_of_week=0)

@@ -17,7 +17,7 @@ module <%= view_name.classify %>Helper
 
   def reservation_calendar
     calendar reservation_calendar_opts do |reservation|
-      %(<a href="/reservations/#{reservation.id}" title="#{h(reservation.name)}">#{h(reservation.name)}</a>)
+      %(<a href="/<%= class_name.pluralize %>/#{reservation.id}" title="#{h(reservation.name)}">#{h(reservation.name)}</a>)
     end
   end
 end

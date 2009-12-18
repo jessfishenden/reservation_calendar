@@ -11,7 +11,7 @@ has a start date and an end date.
 This calendar works from an underlying model class in which each instance that
 contains any number and assortment of child individual date objects. It also
 creates a model with a foreign key out to some object of your choice that must
-implement the :display_name method.  The idea is that since this is a resevation
+implement the :display_name method.  The idea is that since this is a reservation
 calendar, each reservation is a reservation of some actual thing, and that
 thing's name should be displayed in the calendar.
 
@@ -35,9 +35,9 @@ Options:
 * --static-only: Only generate the stylesheet and javascript
 * --use-jquery: Generate jquery javascript
 
-You can change the default reservation model name (Reservation) and view name (Calendar) by passing in two name arguments:
+You can change the default reservation model name (Reservation), child date model name (ReservedDate) and view name (Calendar) by passing in two name arguments:
 
-  script/generate reservation_calendar ReservationModel ViewName
+  script/generate reservation_calendar ReservationModel ChildDateModel ViewName
   
 
 ==Generated Files
@@ -59,7 +59,7 @@ class CreateReservationsAndDates < ActiveRecord::Migration
       t.string :name
       t.timestamps
     end
-    create_table :dates do |t|
+    create_table :reserved_dates do |t|
       t.column :reservation_id, :integer
       t.column :date, :date
       t.timestamps
@@ -67,7 +67,7 @@ class CreateReservationsAndDates < ActiveRecord::Migration
   end
 
   def self.down
-    drop_table :dates
+    drop_table :reserved_dates
     drop_table :reservations
   end
 end
@@ -80,13 +80,21 @@ Or simply override the default virtual attribute on the model. For example, if r
   
   class Reservation < ActiveRecord::Base
     has_reservation_calendar
+
+	  has_many :reserved_dates, :order => :date
+	  validates_length_of :reserved_dates, :minimum => 1, :message => 'must contain at least %d reserved_date'
+
+	  def self.subclass_name
+	    return "reserved_date"
+	  end
   end
 
 ====config/routes.rb
 
   map.calendar 'calendar', :controller => 'calendar', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month
   map.connect '/calendar/:year/:month', :controller => 'calendar', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month
- 
+ 	map.resource :reservation
+
 ====app/controllers/calendar_controller.rb
   
   class CalendarController < ApplicationController
@@ -101,6 +109,21 @@ Or simply override the default virtual attribute on the model. For example, if r
     end
 
   end
+
+====app/controllers/reservations_controller.rb
+
+class ReservationsController < ApplicationController
+  
+	# GET /reservations/1
+  def show
+    @test_reservation = Reservation.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+    end
+  end
+  
+end
 
 ====app/helpers/calendar_helper.rb
 

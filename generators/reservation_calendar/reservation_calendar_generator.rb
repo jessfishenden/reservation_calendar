@@ -27,16 +27,20 @@ class ReservationCalendarGenerator < Rails::Generator::Base
         m.directory File.join("app/models")
         m.template "model.rb.erb", File.join("app/models", "#{@class_name}.rb")
         m.template "subclass_model.rb.erb", File.join("app/models", "#{@subclass_name}.rb")
-        m.template "controller.rb.erb", File.join("app/controllers", "#{@view_name}_controller.rb")
+        m.template "calendar_controller.rb.erb", File.join("app/controllers", "#{@view_name}_controller.rb")
+        m.template "reservation_controller.rb.erb", File.join("app/controllers", "#{@class_name.pluralize}_controller.rb")
+        
         m.directory File.join("app/views")
         m.directory File.join("app/views", @view_name)
+        m.directory File.join("app/views", @class_name.pluralize)
         m.template "view.html.erb", File.join("app/views", @view_name, "index.html.erb")
+        m.template "reservation_show_view.rb.erb", File.join("app/views", @class_name.pluralize,"show.html.erb")
         m.directory File.join("app/helpers")
         m.template "helper.rb.erb", File.join("app/helpers", "#{@view_name}_helper.rb")
         m.migration_template "migration.rb.erb", "db/migrate", :migration_file_name => "create_#{@class_name.pluralize}_and_#{@subclass_name.pluralize}"
         m.route_name(@view_name, "#{@view_name}", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
         m.route_name("connect", "/#{@view_name}/:year/:month", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
-        
+        m.route_resource(@class_name.pluralize)
       end
     end
   end

@@ -1,0 +1,25 @@
+require 'spec_helper'
+
+describe <%= view_name.classify.pluralize%>Controller do
+	integrate_views
+  
+  it "should use <%= view_name.classify.pluralize%>Controller" do
+    controller.should be_an_instance_of(<%= view_name.classify.pluralize%>Controller)
+  end
+  
+   describe "show <%= view_name%>" do
+      before(:each) do
+        @temp_<%= view_name%> = <%= view_name.classify%>.make()
+      end
+      it "should attempt to find the <%= class_name%> in question" do
+        <%= class_name.classify%>.expects(:find).returns(@temp_<%= class_name%>)
+        get 'show', :id=>@temp_<%= class_name%>.id
+        assigns[:<%= class_name%>].should == @temp_<%= class_name%>
+      end
+      
+      it "should render the show view" do
+        get 'show', :id=>@temp_<%= class_name%>.id
+        response.should render_template("show")
+      end
+    end
+end

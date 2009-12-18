@@ -41,6 +41,17 @@ class ReservationCalendarGenerator < Rails::Generator::Base
         m.route_name(@view_name, "#{@view_name}", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
         m.route_name("connect", "/#{@view_name}/:year/:month", ":controller => '#{@view_name}', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month")
         m.route_resource(@class_name.pluralize)
+        
+        # generate the specs
+        m.directory File.join("spec")
+        m.template "spec.blueprints.rb.erb", File.join("spec", "blueprints.rb")
+        m.directory File.join("spec/controllers")
+        m.template "spec.reservations_controller_spec.rb.erb", File.join("spec/controllers", "#{@class_name.pluralize}_controller_spec.rb")
+        m.template "spec.calendar_controller_spec.rb.erb", File.join("spec/controllers", "#{@view_name}_controller_spec.rb")
+        m.directory File.join("spec/models")
+        m.template "spec.reservation_spec.rb.erb", File.join("spec/models", "#{@class_name}_spec.rb")
+        m.template "spec.reserved_date_spec.rb.erb", File.join("spec/models", "#{@subclass_name}_spec.rb")
+   
       end
     end
   end

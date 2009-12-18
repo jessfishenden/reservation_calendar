@@ -44,9 +44,9 @@ module ReservationCalendar
     def reservations_for_date_range(start_d, end_d)
       self.find(
         :all,
-        :select => 'DISTINCT reservations.*',
-        :joins => subclass_name.pluralize.to_sym,
-        :conditions => [ "#{subclass_name.pluralize}.date >= ?  and #{subclass_name.pluralize}.date <= ?", start_d.to_time.utc, end_d.to_time.utc ]
+        :select => "DISTINCT #{name.underscore.pluralize}.*",
+        :joins => :reserved_dates,
+        :conditions => [ "#{child_class_name.pluralize}.date >= ?  and #{child_class_name.pluralize}.date <= ?", start_d.to_time.utc, end_d.to_time.utc ]
       )
     end
     

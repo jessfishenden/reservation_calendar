@@ -83,6 +83,10 @@ Or simply override the default virtual attribute on the model. For example, if r
 
 	  has_many :reserved_dates, :order => :date
 	  validates_length_of :reserved_dates, :minimum => 1, :message => 'must contain at least %d reserved_date'
+	
+		def calendar_strip_text
+	    self.name
+	  end
   end
 
 ====app/models/reserved_date.rb

@@ -83,10 +83,6 @@ Or simply override the default virtual attribute on the model. For example, if r
 
 	  has_many :reserved_dates, :order => :date
 	  validates_length_of :reserved_dates, :minimum => 1, :message => 'must contain at least %d reserved_date'
-
-	  def self.subclass_name
-	    return "reserved_date"
-	  end
   end
 
 ====config/routes.rb
@@ -106,6 +102,10 @@ Or simply override the default virtual attribute on the model. For example, if r
       @shown_month = Date.civil(@year, @month)
 
       @reservation_strips = Reservation.reservation_strips_for_month(@shown_month)
+
+			respond_to do |format|
+	      format.html # index.html.erb
+	    end
     end
 
   end
@@ -160,6 +160,10 @@ Notice you can pass in a block to the calendar method. In this example I'm passi
 Then in calendar view, simply:
 
   <%= reservation_calendar %>
+
+Specs:
+
+The generator will also generate RSpec specs for all of the generated models, helpers and controllers.
 
 
 ==Default Options

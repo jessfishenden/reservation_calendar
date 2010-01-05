@@ -17,7 +17,7 @@ module ReservationCalendar
     # Find all the reservations within this range, and create reservation strips for them
     def reservation_strips_for_month(shown_date, first_day_of_week=0)
       strip_start, strip_end = get_start_and_end_dates(shown_date, first_day_of_week)
-      reservations = reservations_for_date_range(strip_start, strip_end)
+      reservations = self.for_date_range(strip_start, strip_end)
       reservation_strips = create_reservation_strips(strip_start, strip_end, reservations)
       reservation_strips
     end
@@ -38,16 +38,6 @@ module ReservationCalendar
         strip_end = beginning_of_week(start_of_month.next_month + 7, first_day_of_week)
       end
       [strip_start, strip_end]
-    end
-    
-    # Get the reservations overlapping the given start and end dates
-    def reservations_for_date_range(start_d, end_d)
-      self.find(
-        :all,
-        :select => "DISTINCT #{name.underscore.pluralize}.*",
-        :joins => :reserved_dates,
-        :conditions => [ "#{child_class_name.pluralize}.date >= ?  and #{child_class_name.pluralize}.date <= ?", start_d.to_time.utc, end_d.to_time.utc ]
-      )
     end
     
     # Create the various strips that show reservations
@@ -117,6 +107,15 @@ module ReservationCalendar
   
   # Instance Methods
   module InstanceMethods
+  
+    def self.included(base)
+      base.class_eval do
+        named_scope :for_date_range, 
+          lambda {|start_d, end_d| {:select => "DISTINCT #{name.underscore.pluralize}.*",
+            :joins => :reserved_dates, 
+            :conditions => [ "date >= ?  and date <= ?", start_d.to_time.utc, end_d.to_time.utc ]}}
+      end
+    end
   
     def color
       self[:color] || '#9aa4ad'

@@ -33,10 +33,6 @@ describe <%=class_name.classify%> do
           <%=class_name.classify%>.respond_to?(:get_start_and_end_dates).should be_true
         end
 
-        it "should add a class method called reservations_for_date_range" do
-          <%=class_name.classify%>.respond_to?(:reservations_for_date_range).should be_true
-        end
-
         it "should add a class method called create_reservation_strips" do
           <%=class_name.classify%>.respond_to?(:create_reservation_strips).should be_true
         end
@@ -107,17 +103,17 @@ describe <%=class_name.classify%> do
         end
 
         it "should find <%=class_name%>s with dates entirely within the range" do
-          <%=class_name.classify%>.reservations_for_date_range('11/1/2009','11/9/2009').should eql [@<%=class_name%>3]
+          <%=class_name.classify%>.for_date_range('11/1/2009','11/9/2009').should eql [@<%=class_name%>3]
         end
 
         it "should find <%=class_name%>s with dates both in and outside the specified range" do
           #since there's no gaurantee of the order they'll be returned, I compare
           #arrays by finding the intersection.  If the intersection is empty, then they are the same.
-          (<%=class_name.classify%>.reservations_for_date_range('11/10/2009','11/14/2009') - [@<%=class_name%>1, @<%=class_name%>2]).should == []
+          (<%=class_name.classify%>.for_date_range('11/10/2009','11/14/2009') - [@<%=class_name%>1, @<%=class_name%>2]).should == []
         end
 
         it "should not find <%=class_name%>s with dates entirely outside the specified range" do
-          <%=class_name.classify%>.reservations_for_date_range('12/10/2009','12/14/2009').should == []
+          <%=class_name.classify%>.for_date_range('12/10/2009','12/14/2009').should == []
         end
       end
 

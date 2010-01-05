@@ -9,9 +9,13 @@ module ReservationCalendar
         include InstanceMethods
       end
     end
+    
+    def acts_as_reserved_date
+      include DateInstanceMethods
+    end
   end
 
-  # class Methods
+  # class Methods for the reservation class
   module ClassMethods
     # For the given month, find the start and end dates
     # Find all the reservations within this range, and create reservation strips for them
@@ -105,7 +109,7 @@ module ReservationCalendar
     
   end
   
-  # Instance Methods
+  # Instance Methods for the reservation class
   module InstanceMethods
   
     def self.included(base)
@@ -129,5 +133,15 @@ module ReservationCalendar
       reserved_dates.size
     end
   
+  end
+  
+  # instance methods for the reserved date class
+  module DateInstanceMethods
+    def self.included(base)
+      base.class_eval do
+        named_scope :clip, 
+          lambda { |start_date, end_date| {:conditions => ['date >= ? AND date <= ?', start_date, end_date] } }
+      end
+    end
   end
 end

@@ -85,6 +85,13 @@ Or simply override the default virtual attribute on the model. For example, if r
 	  validates_length_of :reserved_dates, :minimum => 1, :message => 'must contain at least %d reserved_date'
   end
 
+====app/models/reserved_date.rb
+
+	class ReservedDate < ActiveRecord::Base
+		acts_as_reserved_date
+	  belongs_to :reservation
+	end
+
 ====config/routes.rb
 
   map.calendar 'calendar', :controller => 'calendar', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month

@@ -132,6 +132,10 @@ module ReservationCalendar
     def days
       reserved_dates.size
     end
+    
+    def calendar_strip_text
+      self[:name] || "Calendar Strip Text"
+    end
   
   end
   

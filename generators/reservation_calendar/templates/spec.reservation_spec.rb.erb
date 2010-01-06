@@ -235,6 +235,17 @@ describe <%=class_name.classify%> do
           <%=class_name%>.days.should == 6
         end
       end
+			
+			describe "calendar_strip_text" do
+        it "should return the name set on the reservation" do
+          <%=class_name.classify%>.make(:name=>"Test Reservation").calendar_strip_text.should == "Test Reservation"
+        end
+        
+        it "should return 'Calendar Strip Text' if name is not set" do
+          <%=class_name.classify%>.make().calendar_strip_text.should == "Calendar Strip Text"
+        end
+      end
+
     end
 
   end

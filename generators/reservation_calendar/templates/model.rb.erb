@@ -1,7 +1,0 @@
-class <%= class_name.classify %> < ActiveRecord::Base
-  has_reservation_calendar
-
-  has_many :reserved_dates, :class_name=>'<%= subclass_name.classify %>', :order => :date
-  validates_length_of :reserved_dates, :minimum => 1, :message => 'must contain at least %d date'
-
-end

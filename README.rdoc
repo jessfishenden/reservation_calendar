@@ -9,16 +9,14 @@ Jeff's Event Calendar calls for an underlying model class in which each instance
 has a start date and an end date.
 
 This calendar works from an underlying model class in which each instance that
-contains any number and assortment of child individual date objects. It also
-creates a model with a foreign key out to some object of your choice that must
-implement the :display_name method.  The idea is that since this is a reservation
-calendar, each reservation is a reservation of some actual thing, and that
-thing's name should be displayed in the calendar.
-
+contains any number and assortment of child individual date objects.
 
 After install, the "calendar" method will be available within your views.
 
 To customize the look, modify the included stylesheet and/or change the default options.
+
+For an example application that is a basic implementation of this plugin, see:
+http://github.com/broughten/reservation_calendar_test_app
 
 
 ==Install
@@ -32,150 +30,7 @@ To generate the necessary static files AND the example below:
 
 Options:
 
-* --static-only: Only generate the stylesheet and javascript
 * --use-jquery: Generate jquery javascript
-
-You can change the default reservation model name (Reservation), child date model name (ReservedDate) and view name (Calendar) by passing in two name arguments:
-
-  script/generate reservation_calendar ReservationModel ChildDateModel ViewName
-  
-
-==Generated Files
-
-Make sure to include the stylesheet and javascript in your layout/view.
-
-====Static files
-
-  public/stylesheets/reservation_calendar.css
-  public/javascripts/reservation_calendar.js
-
-Unless the --static-only option is given, the following will be generated. Names will differ if name arguments were passed to the generator.
-
-====db/migrate/XXXX_create_reservations_and_dates.rb
-
-class CreateReservationsAndDates < ActiveRecord::Migration
-  def self.up
-    create_table :reservations do |t|
-      t.string :name
-      t.timestamps
-    end
-    create_table :reserved_dates do |t|
-      t.column :reservation_id, :integer
-      t.column :date, :date
-      t.timestamps
-    end
-  end
-
-  def self.down
-    drop_table :reserved_dates
-    drop_table :reservations
-  end
-end
-
-A reservation can also have a *color* field (hex value stored as a string) which determines the color of the reservation.
-Or simply override the default virtual attribute on the model. For example, if reservations are associated to a calendar model, then the reservations can get their color from the calendar.
-
-
-====app/models/reservation.rb
-  
-  class Reservation < ActiveRecord::Base
-    has_reservation_calendar
-
-	  has_many :reserved_dates, :order => :date
-	  validates_length_of :reserved_dates, :minimum => 1, :message => 'must contain at least %d reserved_date'
-	
-		def calendar_strip_text
-	    self.name
-	  end
-  end
-
-====app/models/reserved_date.rb
-
-	class ReservedDate < ActiveRecord::Base
-		acts_as_reserved_date
-	  belongs_to :reservation
-	end
-
-====config/routes.rb
-
-  map.calendar 'calendar', :controller => 'calendar', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month
-  map.connect '/calendar/:year/:month', :controller => 'calendar', :action => 'index', :year => Time.zone.now.year, :month => Time.zone.now.month
- 	map.resource :reservation
-
-====app/controllers/calendar_controller.rb
-  
-  class CalendarController < ApplicationController
-
-    def index
-      @month = params[:month].to_i
-      @year = params[:year].to_i
-
-      @shown_month = Date.civil(@year, @month)
-
-      @reservation_strips = Reservation.reservation_strips_for_month(@shown_month)
-
-			respond_to do |format|
-	      format.html # index.html.erb
-	    end
-    end
-
-  end
-
-====app/controllers/reservations_controller.rb
-
-class ReservationsController < ApplicationController
-  
-	# GET /reservations/1
-  def show
-    @reservation = Reservation.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-    end
-  end
-  
-end
-
-====app/helpers/calendar_helper.rb
-
-Some helper methods are created, but you could put this in the view. The key is our calendar method, which takes some options.
-
-  module CalendarHelper
-    def month_link(month_date)
-      link_to(month_date.strftime("%B"), {:month => month_date.month, :year => month_date.year})
-    end
-  
-    # custom options for this calendar
-    def reservation_calendar_options
-      { 
-        :year => @year,
-        :month => @month,
-        :reservation_strips => @reservation_strips,
-        :month_name_text => @shown_month.strftime("%B %Y"),
-        :previous_month_text => "<< " + month_link(@shown_month.last_month),
-        :next_month_text => month_link(@shown_month.next_month) + " >>"
-      }
-    end
-
-    def reservation_calendar
-      calendar reservation_calendar_options do |reservation|
-        %(<a href="/reservations/#{reservation.id}" title="#{h(reservation.name)}">#{h(reservation.name)}</a>)
-      end
-    end
-  end
-  
-Notice you can pass in a block to the calendar method. In this example I'm passing a link to the reservation details, and displaying the reservation's name.
-
-====app/views/calendar/index.html.erb
-
-Then in calendar view, simply:
-
-  <%= reservation_calendar %>
-
-Specs:
-
-The generator will also generate RSpec specs for all of the generated models, helpers and controllers.
-
 
 ==Default Options
 
@@ -251,6 +106,7 @@ You can override any of these by passing your options to the calendar method. In
 
 * Jeff Schuil (original author)
 * Jon Christensen (modified to reservation from events)
+* Mike Gehard ()
 * See commit history for list of additional contributors.
 * Thanks to those who have added features, fixed bugs, and/or reported issues.
 
@@ -260,4 +116,4 @@ You can override any of these by passing your options to the calendar method. In
 * Originally based off of James Urquhart's http://www.cuppadev.co.uk/webdev/making-a-real-calendar-in-rails/
 * This in turn started as Geoffrey Grosenbach's CalendarHelper.
 
-Copyright (c) 2009 Kelsus Inc, released under the MIT license
+Copyright (c) 2010 Kelsus Inc, released under the MIT license

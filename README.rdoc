@@ -24,7 +24,7 @@ http://github.com/broughten/reservation_calendar_test_app
   script/plugin install git@github.com:broughten/reservation_calendar.git
 
 
-To generate the necessary static files AND the example below:
+To generate the necessary static files (javascript and css):
 
   script/generate reservation_calendar
 

@@ -101,6 +101,17 @@ You can override any of these by passing your options to the calendar method. In
 
 * The reservation <b>select color</b> is set in the reservation_calendar.js file.
   
+== Helping develop the plugin
+
+Fork the plugin and clone your fork onto your computer.
+
+You should clone the reservation_calendar_test_app from http://github.com/broughten/reservation_calendar_test_app
+and create a symbolic link (ln -s) into the vendor directory.  This link should point to the location where you 
+cloned the plugin.
+
+As you develop, please create RSpec specs for any functionality that you add/modify.  These specs can be found in the 
+spec directory of the test application.  You will need the RSpec and the rspec-rails gems installed on you computer.
+These gems can be installed if you run rake gems:install from the test app directory.
 
 ==Contributors
 

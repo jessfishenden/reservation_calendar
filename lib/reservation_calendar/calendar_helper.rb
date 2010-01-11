@@ -153,6 +153,13 @@ module ReservationCalendar
               caltd << create_calendar_entry(reservation, dates, reserved_date_index, block)
               should_start_a_new_stripe = false
             end
+
+            if index == 6
+              #If we have a calendar entry to print and we're on the last day of the week, we do it)
+              caltd = add_right_arrow_if_necessary(caltd, day, dates, last_reservation) unless caltd.nil?
+              caltd = flush_calendar_entry(caltd, span)
+            end
+
           #the current day in the loop does not have a reservation on it.
           #so we know we want to add a non-reservation day to the calendar,
           #but we also might need to finalize a calendar entry that we were in the
@@ -160,12 +167,10 @@ module ReservationCalendar
           else
             if !should_start_a_new_stripe
               caltd = add_right_arrow_if_necessary(caltd, day, dates, last_reservation) unless caltd.nil?
-              caltd = caltd.sub("fill_in_colspan", "#{span}")
-              @cal << caltd
+              caltd = flush_calendar_entry(caltd, span)
             end
             dates = []
             last_reservation = nil
-            caltd = ''
             should_start_a_new_stripe = true
             span = 1
             # there wasn't a reservation, so create an empty cell and container
